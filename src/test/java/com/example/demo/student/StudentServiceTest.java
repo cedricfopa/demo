@@ -1,105 +1,107 @@
 package com.example.demo.student;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
-import org.junit.jupiter.api.Assertions;
+import org.assertj.core.api.Assertions;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 
-import java.time.LocalDate;
-import java.time.Month;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
 
 public class StudentServiceTest {
 
     @Mock
-    Optional<Student> optionalStudent ;
-    @Mock
     StudentRepository studentRepository = mock(StudentRepository.class);
-    private StudentService objectToTest =new StudentService(studentRepository);
+    private final StudentService objectToTest = new StudentService(studentRepository);
 
 
     @Test
-    public void addNewStudentTestTrue(){
+    @DisplayName("Add new student that exist")
+    public void addNewStudentThatExistTest() {
+        Student student = mock(Student.class);
+        when(studentRepository.findStudentByEmail(student.getEmail())).thenReturn(Optional.of(student));
+        Assertions.assertThatThrownBy(
+                        () -> objectToTest.addNewStudent(student)
+                )
+                .isExactlyInstanceOf(IllegalStateException.class)
+                .hasMessage("email taken");
+    }
 
-        String email ="cedric@gmail.com";
-        Student student = Student.builder()
-                .name("herman")
-                .email(email)
-                .dob(LocalDate.of(1992, Month.SEPTEMBER, 19))
-                .build();
-        Mockito.when(optionalStudent).thenReturn(Optional.of(student));
-        objectToTest.addNewStudent(student);
-        assertTrue(optionalStudent.isPresent());
-    }
     @Test
-    public void addNewStudentTestFalse(){
-        Student student = Student.builder()
-                .name("herman")
-                .email("cedric@gmail.com")
-                .dob(LocalDate.of(1992, Month.SEPTEMBER, 19))
-                .build();
-        optionalStudent= studentRepository.findStudentByEmail(student.getEmail());
-        Mockito.when(optionalStudent.isPresent()).thenReturn(false);
-        objectToTest.addNewStudent(student);
-        Mockito.verify(studentRepository).save(student);
+    @DisplayName("Add new student successfully")
+    public void addNewStudentSuccessfullyTest() {
+        Student student = mock(Student.class);
+        try {
+            when(studentRepository.findStudentByEmail(student.getEmail())).thenReturn(null);
+        }catch (NullPointerException e){
+            System.out.println(e.getMessage());
+            objectToTest.addNewStudent(student);
+        }
     }
-    @Test
-    public void deleteStudentTestTrue(){
-        Long studentId = Long.valueOf(0);
-        Mockito.when(studentRepository.existsById(studentId)).thenReturn(true);
-        objectToTest.deleteStudent(studentId);
-        Mockito.verify(studentRepository).deleteById(studentId);
-    }
-    @Test
-    public void deleteStudentTestfalse() {
-        Assertions.assertThrows(IllegalStateException.class, () -> {
-            //Code under test
-            Long studentId = Long.valueOf(0);
-            Mockito.when(studentRepository.existsById(studentId)).thenReturn(false);
-            objectToTest.deleteStudent(studentId);
-            Mockito.verify(studentRepository).deleteById(studentId);
-            verify(studentRepository, times(0)).deleteById(studentId);
-        });
-    }
-    @Test
-    public void updateStudentTest(){
-        Student student = Student.builder()
-                .name("herman")
-                .email("cedric@gmail.com")
-                .dob(LocalDate.of(1992, Month.SEPTEMBER, 19))
-                .build();
-        Long studentId = Long.valueOf(0);
-        String name = "cedric0";
-        String email = "cedric@gmail.com";
-        Mockito.when(studentRepository.existsById(studentId)).thenReturn(false);
-        objectToTest.updateStudent(studentId,name,email);
-        Mockito.verify(student).setName(name);
-        Mockito.verify(student).setName(email);
-        /*verify(studentRepository, times(0)).deleteById(studentId);*/
 
-    }
     @Test
-    public void getStudentsTest(){
-        Student student = Student.builder()
-                .name("herman")
-                .email("cedric@gmail.com")
-                .dob(LocalDate.of(1992, Month.SEPTEMBER, 19))
-                .build();
-        List<Student> list = new ArrayList<>();
-        list.add(student);
-        //list= objectToTest.getStudents();
-        Mockito.when(studentRepository.findAll()).thenReturn(list);
-        assertEquals(objectToTest.getStudents(),list);
-        assertTrue(list.size()==1);
+    @DisplayName("delete student when student not found")
+    public void deleteStudentNotFoundTest() {
+        when(studentRepository.existsById(1L)).thenReturn(false);
+        Assertions.assertThatThrownBy(
+                        () -> objectToTest.deleteStudent(1L)
+                )
+                .isExactlyInstanceOf(IllegalStateException.class)
+                .hasMessage("student with id '1' does not exists");
+    }
+
+    @Test
+    @DisplayName("delete student successfully")
+    public void deleteStudentSuccessfullyTest() {
+        Mockito.when(studentRepository.existsById(1L)).thenReturn(true);
+        objectToTest.deleteStudent(1L);
+        verify(studentRepository).deleteById(1L);
+    }
+
+    @Test
+    @DisplayName("Update student successfully")
+    public void updateStudentSuccessfullyTest() {
+        final var newName = "cedric";
+        final var newEmail = "cedric@lao-sarl.cm";
+        final var id = 1L;
+
+        Student student = mock(Student.class);
+        when(studentRepository.findById(id)).thenReturn(Optional.of(student));
+
+        objectToTest.updateStudent(id, newName, newEmail);
+
+        verify(student).setName(newName);
+        verify(student).setEmail(newEmail);
+        verify(studentRepository).save(student);
+    }
+
+    @Test
+    @DisplayName("Update student when student not found")
+    public void updateStudentStudentNotFoundTest() {
+        Assertions.assertThatThrownBy(
+                        () -> objectToTest.updateStudent(1L, "cedric", "cedric@lao-sarl.cm")
+                )
+                .isExactlyInstanceOf(IllegalStateException.class)
+                .hasMessage("student with id '1' does not exists");
+    }
+
+    @Test
+    @DisplayName("Get all the student")
+    public void getStudentsTest() {
+        final var student1 = mock(Student.class);
+        final var student2 = mock(Student.class);
+        Mockito.when(studentRepository.findAll()).thenReturn(List.of(student1, student2));
+
+        final var students = objectToTest.getStudents();
+
+        assertThat(students)
+                .hasSize(2)
+                .contains(student1, student2);
     }
 
 }

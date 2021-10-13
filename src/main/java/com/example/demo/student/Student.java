@@ -5,21 +5,17 @@ import lombok.*;
 import javax.persistence.*;
 import java.time.LocalDate;
 import java.time.Period;
-//construction d'un objet avec des atributs specifique
 @Builder
-//construction d'un objet avec tout les atributs
 @AllArgsConstructor
-//construction d'un objet sans atributs
 @NoArgsConstructor
-//creation de la methode ToString
 @ToString
-//creation des methodes Getter
 @Getter
-//creation des methodes Setter
 @Setter
+@EqualsAndHashCode
 @Entity
 @Table
 public class Student {
+    @EqualsAndHashCode.Include
     @Id
     @SequenceGenerator(
             name = "student_sequence",
