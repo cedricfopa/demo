@@ -1,10 +1,12 @@
 package com.example.demo.student;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.*;
 
 import javax.persistence.*;
 import java.time.LocalDate;
 import java.time.Period;
+
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
@@ -27,14 +29,13 @@ public class Student {
             generator = "student_sequence"
     )
     private Long id;
+    @Column(name = "name")
     private String name;
     private String email;
     private LocalDate dob;
-    @Transient
-    private Integer age;
 
     public Integer getAge() {
-        return Period.between(this.dob,LocalDate.now()).getDays();
+        return Period.between(this.dob, LocalDate.now()).getDays();
     }
 
 

@@ -4,15 +4,12 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
-import reactor.core.publisher.Mono;
 
 import java.time.LocalDate;
 import java.time.Month;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.BDDMockito.willReturn;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -77,29 +74,31 @@ public class StudentControllerTest extends ControllerTest {
         verify(studentService).addNewStudent(student1);
 
     }
+
     @Test
     @DisplayName("Delete a students")
     public void deleteStudentTest() {
-        Student student1 = Student.builder()
-                .id(5L)
-                .build();
+        Long id = 6L;
         webTestClient
                 .delete()
-                .uri("/api/v1/student/"+student1.getId())
+                .uri("/api/v1/student/" + id)
                 .exchange()
                 .expectStatus().isEqualTo(200);
 
-        verify(studentService).deleteStudent(student1.getId());
+        verify(studentService).deleteStudent(id);
 
     }
+
     @Test
     @DisplayName("Update a students")
     public void updateStudentTest() {
+
         Long id = 5L;
         String name = "fopa";
         String email = "fopa@lao-sarl.cm";
+
         Student student1 = Student.builder()
-                .id(5L)
+                .id(id)
                 .name(name)
                 .email(email)
                 .dob(LocalDate.of(1999, Month.SEPTEMBER, 3))
@@ -107,11 +106,17 @@ public class StudentControllerTest extends ControllerTest {
 
         webTestClient
                 .put()
-                .uri("/api/v1/student/"+student1.getId())
+                .uri(
+                        uriBuilder -> uriBuilder
+                                .pathSegment("api", "v1", "student", student1.getId().toString())
+                                .queryParam("name", student1.getName())
+                                .queryParam("email", student1.getEmail())
+                                .build()
+                )
                 .contentType(MediaType.APPLICATION_JSON)
-                .bodyValue(student1)
                 .exchange()
                 .expectStatus().isEqualTo(200);
+
         verify(studentService).updateStudent(id, name, email);
     }
 
