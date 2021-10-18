@@ -19,6 +19,19 @@ public class StudentServiceTest {
     StudentRepository studentRepository = mock(StudentRepository.class);
     private final StudentService objectToTest = new StudentService(studentRepository);
 
+    @Test
+    @DisplayName("Get all the student")
+    public void getStudentsTest() {
+        final var student1 = mock(Student.class);
+        final var student2 = mock(Student.class);
+        Mockito.when(studentRepository.findAll()).thenReturn(List.of(student1, student2));
+
+        final var students = objectToTest.getStudents();
+
+        assertThat(students)
+                .hasSize(2)
+                .contains(student1, student2);
+    }
 
     @Test
     @DisplayName("Add new student that exist")
@@ -88,20 +101,6 @@ public class StudentServiceTest {
                 )
                 .isExactlyInstanceOf(IllegalStateException.class)
                 .hasMessage("student with id '1' does not exists");
-    }
-
-    @Test
-    @DisplayName("Get all the student")
-    public void getStudentsTest() {
-        final var student1 = mock(Student.class);
-        final var student2 = mock(Student.class);
-        Mockito.when(studentRepository.findAll()).thenReturn(List.of(student1, student2));
-
-        final var students = objectToTest.getStudents();
-
-        assertThat(students)
-                .hasSize(2)
-                .contains(student1, student2);
     }
 
 }

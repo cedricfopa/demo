@@ -7,7 +7,7 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 abstract class ControllerTest {
 
     protected WebTestClient webTestClient;
-
+    
     @BeforeEach
     public void initWebTestClient() {
         webTestClient = WebTestClient.bindToController(getController())

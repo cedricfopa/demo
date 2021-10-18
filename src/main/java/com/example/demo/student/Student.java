@@ -1,6 +1,5 @@
 package com.example.demo.student;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.*;
 
 import javax.persistence.*;
@@ -33,10 +32,11 @@ public class Student {
     private String name;
     private String email;
     private LocalDate dob;
+    @Transient
+    private Integer age;
 
     public Integer getAge() {
         return Period.between(this.dob, LocalDate.now()).getDays();
     }
-
 
 }

@@ -1,17 +1,14 @@
 package com.example.demo.student.e2e;
 
-import com.example.demo.student.Student;
 import org.junit.jupiter.api.Test;
-
 import java.time.LocalDate;
-import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class StudentDeleteById extends E2eTest{
     @Test
     void execute() {
-        Long id1 = Long.MAX_VALUE - 3;
+        Long id1 = Long.MAX_VALUE - 1;
 
         jdbcTemplate.update("DELETE FROM student");
         jdbcTemplate.update(

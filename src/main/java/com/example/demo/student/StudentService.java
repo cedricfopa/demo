@@ -1,7 +1,8 @@
 package com.example.demo.student;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Component;
+
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
@@ -9,8 +10,7 @@ import java.util.Objects;
 import java.util.Optional;
 
 @RequiredArgsConstructor
-@Component
-// ou @Service
+@Service
 public class StudentService {
     private final StudentRepository studentRepository;
 
@@ -20,7 +20,8 @@ public class StudentService {
     }
 
     public void addNewStudent(Student student) {
-        Optional<Student> optionalStudent = studentRepository.findStudentByEmail(student.getEmail());
+        Optional<Student> optionalStudent = studentRepository
+                .findStudentByEmail(student.getEmail());
         if (optionalStudent.isPresent()) {
             throw new IllegalStateException("email taken");
         }
@@ -53,10 +54,10 @@ public class StudentService {
         if (email != null &&
                 email.length() > 0 &&
                 !Objects.equals(student.getEmail(), email)) {
-            /*Optional<Student> studentOptional = studentRepository.findStudentByEmail(email);
+            Optional<Student> studentOptional = studentRepository.findStudentByEmail(email);
             if(studentOptional.isPresent()){
                 throw new IllegalStateException("email taken");
-            }*/
+            }
             student.setEmail(email);
         }
         studentRepository.save(student);
